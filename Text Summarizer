@@ -1,0 +1,32 @@
+import gradio as gr
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
+import torch
+
+model_path = "../Models/models--sshleifer--distilbart-cnn-12-6/snapshots/a4f8f3ea906ed274767e9906dbaede7531d660ff"
+
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_path).to(dtype=torch.bfloat16)
+
+text_summary = pipeline("summarization", model=model, tokenizer=tokenizer, device=-1)
+
+# text = '''Korean drama RR: Hanguk deurama, also known as K-drama or Koreanovela, is the Korean-language television shows made in South Korea. These shows began to be produced around the early 1960s, but were mostly consumed domestically until the rise of the Korean Wave in the 1990s. They have since achieved significant international popularity, with millions of viewers across the world.'''
+
+# print(summarizer(text, max_length=50, min_length=10, do_sample=False))
+
+def summary(input):
+    output = text_summary(input, max_length=100, min_length=15, do_sample=True)
+    return output[0]['summary_text']
+gr.close_all()
+
+# demo = gr.Interface(fn=summary,
+#                     inputs="text",
+#                     outputs="text")
+
+demo = gr.Interface(fn=summary,
+                    inputs= [gr.Textbox(label="Input text to summarize", lines=6)],
+                    outputs=[gr.Textbox(label="Summarized text", lines=4)],
+                    title= "GenAI: Text Summarizer",
+                    description= "This is the GenAI application used to summarize a text")
+demo.launch()
+
+
