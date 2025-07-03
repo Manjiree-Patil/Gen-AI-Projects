@@ -1,0 +1,7 @@
+import gradio as gr
+
+def greet(name):
+    return "Welcome to my Gen AI site " + name + "!"
+
+demo = gr.Interface(fn=greet, inputs="text", outputs="text")
+demo.launch(share=True)
